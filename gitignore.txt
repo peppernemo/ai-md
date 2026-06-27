@@ -1,0 +1,12 @@
+.env
+CLAUDE.local.md
+.claude/settings.local.json
+node_modules/
+
+# PHI — never commit patient data
+*.xlsx
+*.xls
+*.json
+*FILLED*
+*.bak*
+~$*

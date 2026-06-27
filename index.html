@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Your Own AI Workflow — Claude Code for Clinicians</title>
+<style>
+  :root {
+    --navy:#16213e; --blue:#0f3460; --bg:#f8f9fa; --ink:#1a1a2e;
+    --line:#e1e4e8; --warn:#b00020; --warnbg:#fff4f4; --good:#0b6e4f;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.55; }
+  .wrap { max-width:860px; margin:0 auto; padding:0 1.2rem 4rem; }
+  header.hero { background:var(--navy); color:#fff; padding:2.4rem 0 2.2rem; }
+  header.hero .wrap { padding-bottom:0; }
+  header.hero h1 { font-size:1.9rem; margin-bottom:.5rem; }
+  header.hero p { font-size:1.05rem; opacity:.92; max-width:640px; }
+  header.hero .by { margin-top:1rem; font-size:.9rem; opacity:.8; }
+  nav.toc { position:sticky; top:0; background:#fff; border-bottom:1px solid var(--line);
+    z-index:5; }
+  nav.toc .wrap { display:flex; flex-wrap:wrap; gap:.2rem 1.1rem; padding:.6rem 1.2rem; }
+  nav.toc a { color:var(--blue); text-decoration:none; font-size:.86rem; font-weight:600; }
+  nav.toc a:hover { text-decoration:underline; }
+  section { margin-top:2.4rem; }
+  h2 { font-size:1.35rem; color:var(--navy); margin-bottom:.7rem;
+    padding-bottom:.3rem; border-bottom:2px solid var(--navy); }
+  h2 .n { color:var(--blue); font-weight:800; margin-right:.5rem; }
+  p.lead { margin:.4rem 0 1rem; }
+  ol, ul { margin:.4rem 0 1rem 1.3rem; }
+  li { margin:.3rem 0; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; }
+  .rule { background:var(--warnbg); border:1px solid #f3c2c2; border-left:5px solid var(--warn);
+    border-radius:8px; padding:1rem 1.1rem; margin:1rem 0; }
+  .rule h3 { color:var(--warn); font-size:1.05rem; margin-bottom:.4rem; }
+  .rule ul { margin-bottom:0; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px;
+    margin:1rem 0; overflow:hidden; }
+  .card-head { display:flex; justify-content:space-between; align-items:center;
+    gap:.6rem; padding:.6rem .9rem; background:#f1f3f6; border-bottom:1px solid var(--line); }
+  .card-head h3 { font-size:.98rem; color:var(--navy); }
+  .actions { display:flex; align-items:center; gap:.5rem; }
+  .hint { font-size:.74rem; color:#777; }
+  .btn { background:var(--blue); color:#fff; border:0; border-radius:6px;
+    padding:.32rem .7rem; font-size:.8rem; font-weight:600; cursor:pointer; text-decoration:none; }
+  .btn:hover { background:var(--navy); }
+  .btn.ghost { background:#fff; color:var(--blue); border:1px solid var(--blue); }
+  pre.code { margin:0; padding:1rem; overflow:auto; max-height:460px;
+    background:#0d1b2a; color:#e6edf3; font-size:.82rem; line-height:1.5; }
+  pre.code code { white-space:pre; }
+  table { width:100%; border-collapse:collapse; margin:.6rem 0 1rem; background:#fff;
+    border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  td { padding:.5rem .7rem; border-bottom:1px solid var(--line); vertical-align:top; font-size:.92rem; }
+  tr:last-child td { border-bottom:0; }
+  td:first-child { width:170px; white-space:nowrap; }
+  .twocol { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  @media (max-width:640px) { .twocol { grid-template-columns:1fr; } td:first-child { width:auto; } }
+  footer { margin-top:3rem; padding-top:1.4rem; border-top:1px solid var(--line);
+    color:#666; font-size:.85rem; }
+  .pill { display:inline-block; background:#e8f0fe; color:var(--blue); border-radius:20px;
+    padding:.15rem .6rem; font-size:.74rem; font-weight:600; }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="pill" style="background:#243b6b;color:#cfe0ff;">NYU Plastic Surgery Residency</span>
+    <h1>Build Your Own AI Workflow</h1>
+    <p>A second-brain setup in Claude Code that drafts your notes, billing, scheduling,
+       and research &mdash; built on one rule: <strong>no PHI ever enters the AI</strong>.</p>
+    <div class="by">Janos Barrera, MD &middot; Hand &amp; Orthoplastic Surgery</div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#rule">The Rule</a>
+  <a href="#quickstart">Quickstart</a>
+  <a href="#prompt">Init Prompt</a>
+  <a href="#claude">CLAUDE.md</a>
+  <a href="#guardrail">PHI Guardrail</a>
+  <a href="#skills">Example Skills</a>
+  <a href="#catalog">What to Build</a>
+</div></nav>
+
+<div class="wrap">
+
+  <section id="rule">
+    <h2><span class="n">0</span>The rule that makes this safe</h2>
+    <div class="rule">
+      <h3>No protected health information ever enters the LLM.</h3>
+      <ul>
+        <li>Not the name. Not the MRN. Not the DOB. Not the patient's face.</li>
+        <li>De-identify <em>before</em> you paste &mdash; age and sex only; strip the demographics header off the note.</li>
+        <li>Notes and emails come out PHI-free, with <code>***</code> placeholders you fill inside Epic / Outlook.</li>
+        <li>If a source document still has identifiers, use your institution's sanctioned, BAA-covered tool (e.g. UltraViolet) &mdash; not a personal agent.</li>
+      </ul>
+    </div>
+    <p class="lead">Everything below is designed around this constraint. You are responsible
+       for what you paste &mdash; the tool can't un-see an identifier.</p>
+  </section>
+
+  <section id="quickstart">
+    <h2><span class="n">1</span>Quickstart</h2>
+    <ol>
+      <li>Install <strong>Claude Code</strong> in your terminal (see the official docs).</li>
+      <li>Make a folder for your "brain" and run <code>git init</code>.</li>
+      <li><strong>Before anything else:</strong> turn on the model-training opt-out and add the PHI <code>.gitignore</code> (below).</li>
+      <li>Paste the <a href="#prompt">Initialize Prompt</a> into Claude Code and answer its questions. It scaffolds the whole workspace for you.</li>
+      <li>Drop in the <a href="#claude">stripped-down CLAUDE.md</a> and build your first <a href="#skills">skill</a>.</li>
+    </ol>
+    
+    <div class="card">
+      <div class="card-head">
+        <h3>.gitignore — block patient data from version control</h3>
+        <div class="actions">
+          <span class="hint">create this first</span>
+          <button class="btn" onclick="copyCode(this)">Copy</button>
+          <a class="btn ghost" href="gitignore.txt" download>Download</a>
+        </div>
+      </div>
+      <pre class="code"><code>.env
+CLAUDE.local.md
+.claude/settings.local.json
+node_modules/
+
+# PHI — never commit patient data
+*.xlsx
+*.xls
+*.json
+*FILLED*
+*.bak*
+~$*
+</code></pre>
+    </div>
+  </section>
+
+  <section id="prompt">
+    <h2><span class="n">2</span>The Initialize Prompt</h2>
+    <p class="lead">Paste this into a fresh Claude Code session in your new folder. It runs a
+       3-phase setup: builds the skeleton, interviews you, then fills in your context files
+       and a lean <code>CLAUDE.md</code>. Contains no patient data and nothing specific to me &mdash; it's the same template this whole system was built from.</p>
+    
+    <div class="card">
+      <div class="card-head">
+        <h3>Executive Assistant — Initialize Prompt</h3>
+        <div class="actions">
+          <span class="hint">copy → paste into Claude Code</span>
+          <button class="btn" onclick="copyCode(this)">Copy</button>
+          <a class="btn ghost" href="executive-assistant-initialize-prompt.txt" download>Download</a>
+        </div>
+      </div>
+      <pre class="code"><code>I want you to set up this project folder as my personal executive assistant / second brain in Claude Code. You&#x27;re going to do this in 3 phases. Complete each phase fully before moving to the next.
+
+
+## Phase 1: Create the folder structure
+
+
+First, initialize a git repo in this folder if one doesn&#x27;t exist already.
+
+
+Then create the following template structure. Don&#x27;t put any content in the files yet -- just create the skeleton with placeholder files where noted.
+
+
+```
+CLAUDE.md                           # Main brain file (we&#x27;ll fill this in Phase 3)
+CLAUDE.local.md                     # My personal overrides (git-ignored)
+.gitignore                          # Ignore .env, CLAUDE.local.md, settings.local.json
+.claude/
+  settings.json                     # Empty JSON object for now: {}
+  rules/                            # We&#x27;ll add rule files in Phase 3
+  skills/                           # Empty -- we&#x27;ll build skills over time
+context/
+  me.md                             # About me (filled in Phase 3)
+  work.md                           # My business/work details (filled in Phase 3)
+  team.md                           # My team (filled in Phase 3)
+  current-priorities.md             # What I&#x27;m focused on right now (filled in Phase 3)
+  goals.md                          # Quarterly goals and milestones (filled in Phase 3)
+templates/
+  session-summary.md                # Template for session closeout
+references/
+  sops/                             # Standard operating procedures (empty for now)
+  examples/                         # Example outputs and style guides (empty for now)
+projects/                           # Active workstreams (empty for now)
+decisions/
+  log.md                            # Decision log (append-only, empty for now)
+archives/                           # Completed/outdated material (empty for now)
+```
+
+
+For empty directories, create a `.gitkeep` file inside them so git tracks them.
+
+
+For `templates/session-summary.md`, use this starter template:
+
+
+```markdown
+# Session Summary
+
+
+**Date:**
+**Focus:**
+
+
+## What Got Done
+-
+
+
+## Decisions Made
+-
+
+
+## Open Items / Next Steps
+-
+
+
+## Memory Updates
+- Preferences learned:
+- Decisions to log:
+```
+
+
+For `decisions/log.md`, use this starter:
+
+
+```markdown
+# Decision Log
+
+
+Append-only. When a meaningful decision is made, log it here.
+
+
+Format: [YYYY-MM-DD] DECISION: ... | REASONING: ... | CONTEXT: ...
+
+
+---
+```
+
+
+For `.gitignore`:
+
+
+```
+.env
+CLAUDE.local.md
+.claude/settings.local.json
+node_modules/
+```
+
+
+For `CLAUDE.local.md`:
+
+
+```markdown
+# Local Overrides
+
+
+Personal preferences and overrides that don&#x27;t get shared via git.
+Add anything here that&#x27;s specific to your local setup.
+```
+
+
+## Phase 2: Ask me onboarding questions
+
+
+Before filling in the context files, rules, and CLAUDE.md, interview me. Ask these questions one section at a time. Don&#x27;t dump all questions at once -- go section by section and wait for my answers before moving on.
+
+
+### Section 1: About You
+- What&#x27;s your name?
+- What&#x27;s your role/title? (e.g., CEO, freelancer, content creator, developer)
+- What&#x27;s your timezone?
+- In one sentence, what do you do?
+- What&#x27;s your #1 priority -- the thing everything else should support?
+
+
+### Section 2: Your Business / Work
+- What&#x27;s your company or business called? (or describe your work if you&#x27;re not a business owner)
+- What are your products, services, or revenue streams? (List each with a one-liner)
+- Roughly how much revenue does each generate? (optional, but helps me prioritize)
+- What tools do you use day-to-day? (ClickUp, Notion, Slack, Google Workspace, etc.)
+- Do you have any MCP servers already connected to Claude Code? (If you don&#x27;t know what this means, just say no)
+
+
+### Section 3: Your Team
+- Do you have a team? If yes, how many people?
+- Who are the 2-3 key people I should know about? (name, role, when to loop them in)
+- Where does your team communicate? (ClickUp, Slack, etc.)
+- What&#x27;s your biggest pain point with managing your team?
+
+
+### Section 4: Priorities, Goals &amp; Projects
+- What are the 3-5 things you&#x27;re most focused on right now?
+- Are there any deadlines or time-sensitive items I should know about?
+- Do you have quarterly goals or milestones you&#x27;re tracking? (If yes, list them. If you don&#x27;t do formal goals, that&#x27;s fine -- your priorities above will work.)
+- What active projects or workstreams are you managing right now? (These are specific initiatives, not ongoing responsibilities. E.g., &quot;launching a new course&quot;, &quot;hiring a VA&quot;, &quot;redesigning the website&quot;)
+
+
+### Section 5: Communication Preferences
+- How do you like information presented? (bullet points, detailed paragraphs, etc.)
+- Any writing pet peeves? (e.g., &quot;never use emojis&quot;, &quot;no em dashes&quot;, &quot;keep it under 3 sentences&quot;)
+- What tone do you want internally (casual, professional, etc.)?
+- What tone do you want for external/public-facing content?
+
+
+### Section 6: What Do You Want Help With?
+- What are the recurring tasks that eat up your time? (List as many as you want)
+- What would you hand off to an assistant first if you could?
+- Are there any specific workflows you want to automate or templatize?
+
+
+## Phase 3: Build out the files
+
+
+Based on my answers, fill in all the files:
+
+
+### Context files
+- **context/me.md** -- My profile based on Section 1 answers
+- **context/work.md** -- My business/work details based on Section 2 answers
+- **context/team.md** -- Team structure based on Section 3 answers (if I have a team; if solo, note that and skip this file)
+- **context/current-priorities.md** -- Priorities from Section 4, dated today
+- **context/goals.md** -- Quarterly goals and milestones from Section 4. If no formal goals, use their top priorities as informal goals. Date it with the current quarter (e.g., &quot;Q2 2026&quot;). Include a note at the top: &quot;Update this file at the start of each quarter.&quot;
+
+
+### Projects
+If the user listed active projects in Section 4, create a folder for each inside `projects/`. Each project folder gets a brief `README.md` with:
+- One-line description of the project
+- Current status (active, planning, on hold)
+- Key dates or deadlines mentioned
+
+
+If no specific projects were mentioned, leave `projects/` empty.
+
+
+### Rule files in .claude/rules/
+Create rule files based on my communication preferences (Section 5). Suggested files:
+- **communication-style.md** -- Writing tone, formatting preferences, pet peeves
+- Any other domain-specific rules that emerged from my answers (e.g., if I mentioned specific tool conventions, content guidelines, etc.)
+
+
+Keep each rule file focused on ONE topic. Don&#x27;t create more than 3-4 rule files to start.
+
+
+### CLAUDE.md (the main brain file)
+This is the most important file. Keep it UNDER 150 lines. It should contain:
+
+
+1. **One-line identity** -- Who you are to me (e.g., &quot;You are [Name]&#x27;s executive assistant.&quot;)
+2. **Top priority** -- The #1 thing everything supports
+3. **Context imports** -- Use `@context/me.md`, `@context/team.md`, `@context/goals.md`, etc. to reference files instead of repeating their content
+4. **Tool integrations** -- What tools are connected (ClickUp, etc.)
+5. **Skills directory** -- Point to `.claude/skills/` and explain how skills work
+6. **Decision log** -- Point to `decisions/log.md` and explain append-only convention
+7. **Memory** -- Add a section explaining how memory works:
+   - &quot;Claude Code maintains a persistent memory across conversations. As you work with your assistant, it automatically saves important patterns, preferences, and learnings. You don&#x27;t need to configure this -- it works out of the box.&quot;
+   - &quot;If you want your assistant to remember something specific, just say &#x27;remember that I always want X&#x27; and it will save it.&quot;
+   - &quot;Memory + context files + decision log = your assistant gets smarter over time without you re-explaining things.&quot;
+8. **Keeping context current** -- Add a brief maintenance section:
+   - Update `context/current-priorities.md` when your focus shifts
+   - Update `context/goals.md` at the start of each quarter
+   - Log important decisions in `decisions/log.md`
+   - Add reference files as needed
+   - Build skills when you notice you&#x27;re repeating the same request
+9. **Projects** -- Point to `projects/` and explain that active workstreams live there
+10. **Templates** -- Point to `templates/`
+11. **References** -- Point to `references/`
+12. **Archives rule** -- Don&#x27;t delete, archive
+
+
+Do NOT put communication style rules in CLAUDE.md -- those go in `.claude/rules/communication-style.md`.
+
+
+Do NOT repeat context from the context files -- just import them with @.
+
+
+Do NOT include a &quot;Session Start Protocol&quot; that tells Claude to read a bunch of files -- the import system and rules handle that automatically now.
+
+
+### Skills directory
+Leave `.claude/skills/` empty. Don&#x27;t create any skills yet. Just make sure CLAUDE.md mentions that skills live there and explains the pattern:
+- Each skill gets a folder: `.claude/skills/skill-name/SKILL.md`
+- Skills are built organically as recurring workflows emerge
+- Include a note about the answers from Section 6 (what they want help with) as a &quot;Skills to Build&quot; backlog in CLAUDE.md or a separate file
+
+
+## Final Step
+
+
+After everything is created:
+1. Show me a tree view of every file and folder you created
+2. Show me a brief summary of what&#x27;s in each file (one line per file)
+3. List the &quot;Skills to Build&quot; backlog based on my Section 6 answers -- these are the workflows we&#x27;ll turn into skills over time
+4. Show me this maintenance cheat sheet:
+
+
+**Keeping Your Assistant Sharp**
+- **Weekly:** Nothing required. Auto-memory handles daily learnings for you.
+- **Monthly:** Glance at `context/current-priorities.md`. If your focus has shifted, update it.
+- **Quarterly:** Update `context/goals.md` with new goals and milestones.
+- **As needed:** Log decisions in `decisions/log.md`. Add reference files. Build new skills.
+- **Pro tip:** If you want your assistant to remember something permanently, just tell it: &quot;Remember that I always prefer X.&quot; It will save it across all future conversations.
+
+
+5. Create the first git commit with all the files
+6. Ask me if I want to build any of those skills right now
+
+
+## Important Rules for You (Claude)
+
+
+- Do NOT create any skills yet. The skills directory should be empty after setup.
+- Keep CLAUDE.md UNDER 150 lines. If it&#x27;s getting long, you&#x27;re putting too much in it.
+- Use @ imports (e.g., @context/me.md) in CLAUDE.md instead of repeating information.
+- One rule file = one topic. Max 3-4 rule files to start.
+- Ask onboarding questions ONE SECTION AT A TIME. Wait for my response before asking the next section.
+- If I say &quot;skip&quot; or &quot;I&#x27;ll fill that in later&quot; for any section, create the file with a placeholder and move on.
+
+
+
+
+</code></pre>
+    </div>
+  </section>
+
+  <section id="claude">
+    <h2><span class="n">3</span>A stripped-down CLAUDE.md</h2>
+    <p class="lead">The brain file the agent reads every session. Keep it under ~150 lines and
+       use <code>@imports</code> instead of repeating your context. Replace the bracketed bits.</p>
+    
+    <div class="card">
+      <div class="card-head">
+        <h3>CLAUDE.md (clinician starter)</h3>
+        <div class="actions">
+          <span class="hint">the agent&#x27;s operating manual</span>
+          <button class="btn" onclick="copyCode(this)">Copy</button>
+          <a class="btn ghost" href="CLAUDE.md" download>Download</a>
+        </div>
+      </div>
+      <pre class="code"><code># [Your Name], MD — Second Brain &amp; Executive Assistant
+
+You are Dr. [Name]&#x27;s executive assistant. Top priority: make clinical, academic,
+and administrative work more efficient — without ever handling PHI.
+
+## The PHI Rule (non-negotiable, read first)
+- NEVER paste patient identifiers (name, MRN, DOB, full-face photos) into this assistant.
+- De-identify before pasting: age + sex only; strip the demographics header off any note.
+- Generated notes/emails are PHI-free by default. Use `***` placeholders for
+  name/MRN/DOB and fill them in inside Epic / your email client yourself.
+- If a step truly needs identifiers in a pasted source, use your institution&#x27;s
+  sanctioned, BAA-covered AI tool instead of this local agent.
+- Never commit patient data to git (see `.gitignore`).
+
+## Context
+- @context/me.md — who I am, subspecialty, priorities
+- @context/work.md — sites, tools, schedule
+- @context/team.md — key people
+- @context/current-priorities.md
+- @context/goals.md
+
+## Rules
+Auto-loaded from `.claude/rules/`:
+- communication-style.md — tone, formatting, pet peeves
+
+## Skills
+Reusable workflows live in `.claude/skills/&lt;name&gt;/SKILL.md`. Each teaches one job
+end-to-end and triggers on a phrase or `/name`. Build them organically as recurring
+tasks emerge. Every clinical skill must restate the PHI Rule above.
+
+## Decision Log
+Append meaningful decisions to `decisions/log.md`:
+`[YYYY-MM-DD] DECISION: ... | REASONING: ... | CONTEXT: ...`
+
+## Memory
+Claude Code persists memory across sessions. Say &quot;remember that I always want X&quot;
+to save a preference. Memory + context + decision log = it gets smarter without
+you re-explaining things.
+
+## Projects
+Each active workstream gets `projects/&lt;name&gt;/README.md` (status, current step, files).
+
+## Maintenance
+- Update `current-priorities.md` when focus shifts
+- Update `goals.md` at the start of each quarter
+- Archive completed work to `archives/` (don&#x27;t delete)
+
+## Skills to Build (backlog)
+1. clinic-note — draft notes from de-identified inputs
+2. op-report — operative notes + billing accumulation
+3. case-booking — OR booking emails with *** placeholders
+4. literature-prep — pull references for an upcoming case
+5. cv-update — merge new pubs/talks into the faculty CV template
+</code></pre>
+    </div>
+  </section>
+
+  <section id="guardrail">
+    <h2><span class="n">4</span>The PHI guardrail block</h2>
+    <p class="lead">Paste this at the top of <em>every</em> clinical skill, and reference it in
+       <code>CLAUDE.md</code>. It's the floor that keeps identifiers out.</p>
+    
+    <div class="card">
+      <div class="card-head">
+        <h3>PHI Policy block</h3>
+        <div class="actions">
+          <span class="hint">drop into each clinical SKILL.md</span>
+          <button class="btn" onclick="copyCode(this)">Copy</button>
+          
+        </div>
+      </div>
+      <pre class="code"><code>## PHI Policy (paste at the top of every clinical skill)
+
+This skill never receives or emits PHI. Patient name, MRN, and DOB are `***`
+placeholders the user fills in inside Epic / Outlook. De-identify all pasted
+source material first (age + sex only; strip the demographics header). For any
+step that needs identifiers in a pasted source document, use the institution&#x27;s
+sanctioned, BAA-covered AI tool instead.
+</code></pre>
+    </div>
+  </section>
+
+  <section id="skills">
+    <h2><span class="n">5</span>Example skills</h2>
+    <p class="lead">A skill is one folder with a <code>SKILL.md</code> that teaches the agent a
+       single job. It triggers on a phrase or <code>/name</code>. Two PHI-safe examples:</p>
+    
+    <div class="card">
+      <div class="card-head">
+        <h3>skills/case-booking/SKILL.md — the *** placeholder pattern</h3>
+        <div class="actions">
+          <span class="hint">PHI-safe</span>
+          <button class="btn" onclick="copyCode(this)">Copy</button>
+          
+        </div>
+      </div>
+      <pre class="code"><code>---
+name: case-booking
+description: &gt;
+  Create a surgery case-booking email for the OR scheduling team. Collects
+  NON-PHI surgical information, assigns ICD-10 and CPT codes, and generates a
+  formatted email with *** placeholders for patient identifiers. Trigger:
+  &quot;book a case&quot;, &quot;case booking&quot;, &quot;schedule a case&quot;, &quot;/case-booking&quot;.
+---
+
+# Surgery Case Booking Email
+
+## PHI Policy
+The booking email never contains name, DOB, or MRN. Emit `***` for those three
+fields; the surgeon types them into the email client before sending. Diagnosis,
+procedure, CPT, date, and facility are fine to handle (limited dataset).
+
+## Step 1 — Collect (non-PHI)
+Ask for: procedure(s), laterality, diagnosis, surgical site/facility, date,
+anesthesia type, implants/equipment, estimated time.
+
+## Step 2 — Assign codes
+Assign ICD-10 and CPT from the procedure description. Be explicit about
+laterality and bundling. Flag anything ambiguous for confirmation.
+
+## Step 3 — Generate the email
+```
+To: [scheduling team]
+Subject: Case Booking — *** (MRN ***) — [date]
+
+Patient: ***
+DOB: ***
+MRN: ***
+Procedure: [procedure], [laterality]
+Diagnosis: [dx] ([ICD-10])
+CPT: [codes]
+Facility: [site]
+Anesthesia: [type]
+Equipment: [implants/trays]
+```
+
+## Step 4 — Hand off
+Open the email client with the draft so the surgeon fills the `***` fields and
+sends. Identifiers never pass through the model.
+</code></pre>
+    </div>
+    
+    <div class="card">
+      <div class="card-head">
+        <h3>skills/clinic-note/SKILL.md — de-identified documentation</h3>
+        <div class="actions">
+          <span class="hint">PHI-free by default</span>
+          <button class="btn" onclick="copyCode(this)">Copy</button>
+          
+        </div>
+      </div>
+      <pre class="code"><code>---
+name: clinic-note
+description: &gt;
+  Generate a clinic note from pasted DE-IDENTIFIED clinical data (referring
+  notes, imaging, EMG/NCS) using your Epic templates. Auto-selects the template
+  from the diagnosis. PHI-free by default. Trigger: &quot;clinic note&quot;, &quot;draft note&quot;.
+---
+
+# Clinic Note
+
+## PHI Policy
+Note output is PHI-free by default: omit the patient name/MRN/DOB header entirely
+(add a `.demo` dot phrase in Epic yourself). Body uses age + sex only. Reading
+identifiers in the *input* is discouraged — strip them before pasting. Opt out
+explicitly with &quot;include PHI&quot; only if your tool is BAA-covered.
+
+## Step 1 — Detect the note type
+H&amp;P / follow-up / post-op / procedure-specific. Pick the matching template.
+
+## Step 2 — Map the input
+Pull HPI, exam, imaging read, and assessment from the pasted (de-identified) data.
+Leave anything missing as `***` (an Epic wildcard) rather than inventing it.
+
+## Step 3 — Write to your style
+Attending-level Assessment &amp; Plan: diagnosis, differential, decision-making.
+Don&#x27;t regurgitate the exam — cite a finding only if it changes the plan.
+
+## Step 4 — Output
+Plain text ready to paste into Epic. No identifiers in the body.
+</code></pre>
+    </div>
+  </section>
+
+  <section id="catalog">
+    <h2><span class="n">6</span>What you might build</h2>
+    <p class="lead">Build skills organically &mdash; whenever you notice you're repeating the
+       same request. A starting menu:</p>
+    <table><tr><td><code>clinic-note</code></td><td>Draft notes from de-identified inputs; auto-selects your template.</td></tr>
+<tr><td><code>op-report</code></td><td>Operative notes from dictation + accumulate the day&#x27;s billing email.</td></tr>
+<tr><td><code>case-booking</code></td><td>OR booking emails with *** placeholders; open them in your mail client.</td></tr>
+<tr><td><code>literature-prep</code></td><td>Pull anatomy, technique, pitfalls, and references for an upcoming case.</td></tr>
+<tr><td><code>article-filer</code></td><td>Drop a PDF → renamed, filed to the right folder, logged with a key finding.</td></tr>
+<tr><td><code>cv-update</code></td><td>Merge new publications and talks into the faculty CV template.</td></tr>
+<tr><td><code>cme-tracker</code></td><td>Log CME certificates and track recertification progress.</td></tr>
+<tr><td><code>pearl</code></td><td>Capture a teaching point and route it into a resident review guide.</td></tr></table>
+    <p class="lead">Every clinical skill carries the <a href="#guardrail">PHI guardrail</a>.
+       Research, CV, and teaching skills touch no patient data at all.</p>
+  </section>
+
+  <footer>
+    <p>Built for the NYU Plastic Surgery Residency. The workflow is model-agnostic; the
+       enabling constraint &mdash; not the limitation &mdash; is <strong>no PHI in the LLM</strong>.</p>
+    <p style="margin-top:.4rem;">Questions: Janos Barrera, MD &middot; Hand &amp; Orthoplastic Surgery.</p>
+  </footer>
+
+</div>
+
+<script>
+function copyCode(btn) {
+  var card = btn.closest('.card');
+  var code = card.querySelector('pre code');
+  var text = code.innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    var old = btn.innerText; btn.innerText = 'Copied!';
+    setTimeout(function(){ btn.innerText = old; }, 1400);
+  });
+}
+</script>
+</body>
+</html>
