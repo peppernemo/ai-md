@@ -20,13 +20,14 @@ and administrative work more efficient — without ever handling PHI.
 - @context/goals.md
 
 ## Rules
-Auto-loaded from `.claude/rules/`:
+Auto-loaded from `.claude/rules/` at the start of every session:
+- phi-policy.md — the PHI rule; applies to every skill automatically
 - communication-style.md — tone, formatting, no em-dashes
 
 ## Skills
 Reusable workflows live in `.claude/skills/<name>/SKILL.md`. Each teaches one job
 end-to-end and triggers on a phrase or `/name`. Build them organically as recurring
-tasks emerge. Every clinical skill must restate the PHI Rule above.
+tasks emerge. The PHI rule auto-loads from `.claude/rules/`, so every skill inherits it — you never paste it into a skill.
 
 ## Decision Log
 Append meaningful decisions to `decisions/log.md`:
@@ -48,6 +49,6 @@ Each active workstream gets `projects/<name>/README.md` (status, current step, f
 ## Skills to Build (backlog)
 1. clinic-note — draft notes from de-identified inputs
 2. consult-note — structured consults from de-identified inputs
-3. literature-prep — pull references for an upcoming case
-4. cv-update — merge new pubs/talks into your CV template
-5. presentation-draft — turn an outline into slides
+3. call-schedule — add your on-call shifts to Google Calendar
+4. case-log — track ABPS / hand-surgery certification cases
+5. cv-update — merge new pubs/talks into your CV template

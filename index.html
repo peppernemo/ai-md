@@ -511,13 +511,14 @@ and administrative work more efficient — without ever handling PHI.
 - @context/goals.md
 
 ## Rules
-Auto-loaded from `.claude/rules/`:
+Auto-loaded from `.claude/rules/` at the start of every session:
+- phi-policy.md — the PHI rule; applies to every skill automatically
 - communication-style.md — tone, formatting, no em-dashes
 
 ## Skills
 Reusable workflows live in `.claude/skills/&lt;name&gt;/SKILL.md`. Each teaches one job
 end-to-end and triggers on a phrase or `/name`. Build them organically as recurring
-tasks emerge. Every clinical skill must restate the PHI Rule above.
+tasks emerge. The PHI rule auto-loads from `.claude/rules/`, so every skill inherits it — you never paste it into a skill.
 
 ## Decision Log
 Append meaningful decisions to `decisions/log.md`:
@@ -539,30 +540,32 @@ Each active workstream gets `projects/&lt;name&gt;/README.md` (status, current s
 ## Skills to Build (backlog)
 1. clinic-note — draft notes from de-identified inputs
 2. consult-note — structured consults from de-identified inputs
-3. literature-prep — pull references for an upcoming case
-4. cv-update — merge new pubs/talks into your CV template
-5. presentation-draft — turn an outline into slides
+3. call-schedule — add your on-call shifts to Google Calendar
+4. case-log — track ABPS / hand-surgery certification cases
+5. cv-update — merge new pubs/talks into your CV template
 </code></pre>
     </div>
   </section>
 
   <section id="guardrail">
-    <h2><span class="n">4</span>The PHI guardrail block</h2>
-    <p class="lead">Paste this at the top of <em>every</em> clinical skill, and reference it in
-       <code>CLAUDE.md</code>. It's the floor that keeps identifiers out.</p>
+    <h2><span class="n">4</span>Make the PHI rule automatic</h2>
+    <p class="lead">Don't paste this into every skill by hand. Save it <strong>once</strong> as a
+       rule at <code>.claude/rules/phi-policy.md</code> &mdash; Claude Code auto-loads every file in
+       <code>.claude/rules/</code> at the start of each session, so the rule applies to <em>every</em>
+       skill automatically. (The Initialize Prompt can create it for you.)</p>
     
     <div class="card">
       <div class="card-head">
-        <h3>PHI Policy block</h3>
+        <h3>.claude/rules/phi-policy.md — auto-loaded; covers every skill</h3>
         <div class="actions">
-          <span class="hint">drop into each clinical SKILL.md</span>
+          <span class="hint">save once, never paste again</span>
           <button class="btn" onclick="copyCode(this)">Copy</button>
           
         </div>
       </div>
-      <pre class="code"><code>## PHI Policy (paste at the top of every clinical skill)
+      <pre class="code"><code># PHI Policy — save once as .claude/rules/phi-policy.md (auto-loads for every skill)
 
-This skill never receives or emits PHI. Patient name, MRN, and DOB are `***`
+Claude never receives or emits PHI. Patient name, MRN, and DOB are `***`
 placeholders the user fills in inside Epic. De-identify all pasted
 source material first (age + sex only; strip the demographics header). For any
 step that needs identifiers in a pasted source document, use the institution&#x27;s
@@ -590,7 +593,6 @@ sanctioned, BAA-covered AI tool instead.
       <pre class="code"><code>Patient Name: @NAME@      &lt;-- the identifier header lives at the TOP,
 DOB: @DOB@                    physically separated from the clinical note.
 MRN: @MRN@                    NEVER paste this block into Claude.
-Location: {JB Location:24419}
 ------------------------------------------------------------------
 Hand Surgery
 Follow Up Visit                &lt;-- start your paste HERE (clinical content only)
@@ -702,8 +704,7 @@ when the source notes weren&#x27;t built to separate PHI.</code></pre>
       </div>
       <pre class="code"><code>Patient Name: @NAME@
 DOB: @DOB@
-MRN: @MRN@
-Location: {JB Location:24419}</code></pre>
+MRN: @MRN@</code></pre>
     </div>
   </section>
 
@@ -760,13 +761,13 @@ Plain text ready to paste into Epic. No identifiers in the body.
        same request. A starting menu:</p>
     <table><tr><td><code>clinic-note</code></td><td>Draft notes from de-identified inputs; auto-selects your template.</td></tr>
 <tr><td><code>op-report</code></td><td>Operative notes from free-form dictation, with ICD-10/CPT codes assigned.</td></tr>
-<tr><td><code>literature-prep</code></td><td>Pull anatomy, technique, pitfalls, and references for an upcoming case.</td></tr>
+<tr><td><code>call-schedule</code></td><td>Import your on-call shifts into Google Calendar.</td></tr>
+<tr><td><code>case-log</code></td><td>Track ABPS / hand-surgery certification cases (CQ).</td></tr>
 <tr><td><code>article-filer</code></td><td>Drop a PDF → renamed, filed to the right folder, logged with a key finding.</td></tr>
 <tr><td><code>cv-update</code></td><td>Merge new publications and talks into the faculty CV template.</td></tr>
-<tr><td><code>cme-tracker</code></td><td>Log CME certificates and track recertification progress.</td></tr>
-<tr><td><code>pearl</code></td><td>Capture a teaching point and route it into a resident review guide.</td></tr></table>
-    <p class="lead">Every clinical skill carries the <a href="#guardrail">PHI guardrail</a>.
-       Research, CV, and teaching skills touch no patient data at all.</p>
+<tr><td><code>cme-tracker</code></td><td>Log CME certificates and track recertification progress.</td></tr></table>
+    <p class="lead">Every clinical skill inherits the <a href="#guardrail">PHI rule</a> automatically
+       (it lives in <code>.claude/rules/</code>). Research, CV, and teaching skills touch no patient data at all.</p>
   </section>
 
   <footer>
