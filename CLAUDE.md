@@ -47,7 +47,7 @@ Each active workstream gets `projects/<name>/README.md` (status, current step, f
 
 ## Skills to Build (backlog)
 1. clinic-note — draft notes from de-identified inputs
-2. op-report — operative notes + billing accumulation
-3. case-booking — OR booking emails with *** placeholders
-4. literature-prep — pull references for an upcoming case
-5. cv-update — merge new pubs/talks into the faculty CV template
+2. consult-note — structured consults from de-identified inputs
+3. literature-prep — pull references for an upcoming case
+4. cv-update — merge new pubs/talks into your CV template
+5. presentation-draft — turn an outline into slides
