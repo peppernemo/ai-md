@@ -524,62 +524,7 @@ sanctioned, BAA-covered AI tool instead.
   <section id="skills">
     <h2><span class="n">5</span>Example skills</h2>
     <p class="lead">A skill is one folder with a <code>SKILL.md</code> that teaches the agent a
-       single job. It triggers on a phrase or <code>/name</code>. Two PHI-safe examples:</p>
-    
-    <div class="card">
-      <div class="card-head">
-        <h3>skills/case-booking/SKILL.md — the *** placeholder pattern</h3>
-        <div class="actions">
-          <span class="hint">PHI-safe</span>
-          <button class="btn" onclick="copyCode(this)">Copy</button>
-          
-        </div>
-      </div>
-      <pre class="code"><code>---
-name: case-booking
-description: &gt;
-  Create a surgery case-booking email for the OR scheduling team. Collects
-  NON-PHI surgical information, assigns ICD-10 and CPT codes, and generates a
-  formatted email with *** placeholders for patient identifiers. Trigger:
-  &quot;book a case&quot;, &quot;case booking&quot;, &quot;schedule a case&quot;, &quot;/case-booking&quot;.
----
-
-# Surgery Case Booking Email
-
-## PHI Policy
-The booking email never contains name, DOB, or MRN. Emit `***` for those three
-fields; the surgeon types them into the email client before sending. Diagnosis,
-procedure, CPT, date, and facility are fine to handle (limited dataset).
-
-## Step 1 — Collect (non-PHI)
-Ask for: procedure(s), laterality, diagnosis, surgical site/facility, date,
-anesthesia type, implants/equipment, estimated time.
-
-## Step 2 — Assign codes
-Assign ICD-10 and CPT from the procedure description. Be explicit about
-laterality and bundling. Flag anything ambiguous for confirmation.
-
-## Step 3 — Generate the email
-```
-To: [scheduling team]
-Subject: Case Booking — *** (MRN ***) — [date]
-
-Patient: ***
-DOB: ***
-MRN: ***
-Procedure: [procedure], [laterality]
-Diagnosis: [dx] ([ICD-10])
-CPT: [codes]
-Facility: [site]
-Anesthesia: [type]
-Equipment: [implants/trays]
-```
-
-## Step 4 — Hand off
-Open the email client with the draft so the surgeon fills the `***` fields and
-sends. Identifiers never pass through the model.
-</code></pre>
-    </div>
+       single job. It triggers on a phrase or <code>/name</code>. A worked, PHI-safe example:</p>
     
     <div class="card">
       <div class="card-head">
@@ -629,7 +574,6 @@ Plain text ready to paste into Epic. No identifiers in the body.
        same request. A starting menu:</p>
     <table><tr><td><code>clinic-note</code></td><td>Draft notes from de-identified inputs; auto-selects your template.</td></tr>
 <tr><td><code>op-report</code></td><td>Operative notes from dictation + accumulate the day&#x27;s billing email.</td></tr>
-<tr><td><code>case-booking</code></td><td>OR booking emails with *** placeholders; open them in your mail client.</td></tr>
 <tr><td><code>literature-prep</code></td><td>Pull anatomy, technique, pitfalls, and references for an upcoming case.</td></tr>
 <tr><td><code>article-filer</code></td><td>Drop a PDF → renamed, filed to the right folder, logged with a key finding.</td></tr>
 <tr><td><code>cv-update</code></td><td>Merge new publications and talks into the faculty CV template.</td></tr>
