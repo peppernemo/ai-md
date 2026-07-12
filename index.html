@@ -515,6 +515,7 @@ This is the most important file. Keep it UNDER 150 lines. It should contain:
    - Universal invariants (the PHI rule, communication style) live in `.claude/rules/`
    - Conventions that matter to only one job live inside that job&#x27;s `SKILL.md` -- not in memory, not in CLAUDE.md
    - Memory holds recent corrections that haven&#x27;t settled yet; when one proves stable, graduate it into the relevant skill or rule
+   - Best practice: when the user corrects a skill&#x27;s output and confirms it as a standing preference, edit that SKILL.md right then -- don&#x27;t let settled conventions pile up in memory
 11. **Projects** -- Point to `projects/` and explain that active workstreams live there
 12. **Templates** -- Point to `templates/`
 13. **References** -- Point to `references/`
@@ -1062,6 +1063,13 @@ Write it to .claude/skills/journal-club/SKILL.md with a name, a description that
       <tr><td><strong>Do I need to know how to code?</strong></td>
           <td>No. Everything here is plain-English Markdown files. You tell Claude what you want; it
               writes the files. If you can write a note template, you can build a skill.</td></tr>
+      <tr><td><strong>Should I copy this setup exactly?</strong></td>
+          <td>No &mdash; this page is a <em>snapshot</em> of a system that changes constantly. What I
+              do today is different from a month ago and will be different in a year; what works for
+              me may not fit your practice. Copy the architecture (the PHI rule, pointers &rarr; rules
+              &rarr; skills &rarr; memory) and the habit &mdash; <strong>reflect, analyze, change,
+              continuously</strong> &mdash; not my exact conventions. The compounding loop is the
+              product; the agent itself will help you refactor as you go.</td></tr>
     </table>
   </section>
 

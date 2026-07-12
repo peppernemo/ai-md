@@ -253,6 +253,7 @@ This is the most important file. Keep it UNDER 150 lines. It should contain:
    - Universal invariants (the PHI rule, communication style) live in `.claude/rules/`
    - Conventions that matter to only one job live inside that job's `SKILL.md` -- not in memory, not in CLAUDE.md
    - Memory holds recent corrections that haven't settled yet; when one proves stable, graduate it into the relevant skill or rule
+   - Best practice: when the user corrects a skill's output and confirms it as a standing preference, edit that SKILL.md right then -- don't let settled conventions pile up in memory
 11. **Projects** -- Point to `projects/` and explain that active workstreams live there
 12. **Templates** -- Point to `templates/`
 13. **References** -- Point to `references/`
