@@ -1,0 +1,306 @@
+I want you to set up this project folder as my personal executive assistant / second brain in Claude Code. I am a clinician: this workspace must be PHI-safe from the first commit. You're going to do this in 3 phases. Complete each phase fully before moving to the next.
+
+THE PHI RULE (applies to everything you do, starting now): no protected health information ever enters this assistant. Never ask me for, store, or write a patient name, MRN, DOB, or any other identifier. If I paste something that looks like it contains an identifier, stop and tell me before doing anything with it.
+
+
+## Phase 1: Create the folder structure
+
+
+First, initialize a git repo in this folder if one doesn't exist already.
+
+
+Then create the following template structure. Don't put any content in the files yet -- just create the skeleton with placeholder files where noted. The two exceptions are `.gitignore` and `.claude/rules/phi-policy.md`, which get their full contents NOW, in Phase 1, before anything else -- safety before features.
+
+
+```
+CLAUDE.md                           # Main brain file (we'll fill this in Phase 3)
+CLAUDE.local.md                     # My personal overrides (git-ignored)
+.gitignore                          # PHI-blocking ignore rules (full content below)
+.claude/
+  settings.json                     # Empty JSON object for now: {}
+  rules/
+    phi-policy.md                   # The PHI rule (full content below) -- auto-loads every session
+  skills/                           # Empty -- we'll build skills over time
+context/
+  me.md                             # About me (filled in Phase 3)
+  work.md                           # My practice/work details (filled in Phase 3)
+  team.md                           # My team (filled in Phase 3)
+  current-priorities.md             # What I'm focused on right now (filled in Phase 3)
+  goals.md                          # Goals and milestones (filled in Phase 3)
+templates/
+  session-summary.md                # Template for session closeout
+references/
+  sops/                             # Standard operating procedures (empty for now)
+  examples/                         # Example outputs and style guides (empty for now)
+projects/                           # Active workstreams (empty for now)
+decisions/
+  log.md                            # Decision log (append-only, empty for now)
+archives/                           # Completed/outdated material (empty for now)
+```
+
+
+For empty directories, create a `.gitkeep` file inside them so git tracks them.
+
+
+For `.gitignore`, use exactly this (the PHI block is the backstop that keeps patient data out of version control):
+
+
+```
+.env
+CLAUDE.local.md
+.claude/settings.local.json
+node_modules/
+
+# PHI -- never commit patient data
+*.xlsx
+*.xls
+*.csv
+*.json
+!.claude/settings.json
+*FILLED*
+*.bak*
+~$*
+*.jpg
+*.jpeg
+*.png
+*.heic
+```
+
+
+For `.claude/rules/phi-policy.md`, use exactly this (Claude Code auto-loads every file in `.claude/rules/` at the start of each session, so this rule covers every future skill automatically):
+
+
+```markdown
+# PHI Policy -- non-negotiable, applies to every skill and every session
+
+This assistant never receives or emits PHI. Patient name, MRN, and DOB are `***`
+placeholders the user fills in inside the EMR themselves. All pasted source
+material must already be de-identified (age + sex only; demographics header
+stripped). If pasted input appears to contain an identifier, stop and flag it
+instead of processing it. For any step that truly needs identifiers in a source
+document, the user goes to their institution's sanctioned, BAA-covered AI tool
+instead of this assistant. Never commit patient data to git.
+```
+
+
+For `templates/session-summary.md`, use this starter template:
+
+
+```markdown
+# Session Summary
+
+
+**Date:**
+**Focus:**
+
+
+## What Got Done
+-
+
+
+## Decisions Made
+-
+
+
+## Open Items / Next Steps
+-
+
+
+## Memory Updates
+- Preferences learned:
+- Decisions to log:
+```
+
+
+For `decisions/log.md`, use this starter:
+
+
+```markdown
+# Decision Log
+
+
+Append-only. When a meaningful decision is made, log it here.
+
+
+Format: [YYYY-MM-DD] DECISION: ... | REASONING: ... | CONTEXT: ...
+
+
+---
+```
+
+
+For `CLAUDE.local.md`:
+
+
+```markdown
+# Local Overrides
+
+
+Personal preferences and overrides that don't get shared via git.
+Add anything here that's specific to your local setup.
+```
+
+
+After the skeleton exists, make the first git commit ("PHI-safe scaffold: gitignore + phi-policy first") so the safety files are in history before any content.
+
+
+## Phase 2: Ask me onboarding questions
+
+
+Before filling in the context files, rules, and CLAUDE.md, interview me. Ask these questions one section at a time. Don't dump all questions at once -- go section by section and wait for my answers before moving on. Remember: no patient information belongs in any answer -- if a question could pull an identifier out of me, don't ask it that way.
+
+
+### Section 1: About You
+- What's your name and degree(s)?
+- What's your role and level? (e.g., PGY-3 resident, fellow, attending, NP/PA)
+- What's your specialty / subspecialty?
+- What's your timezone?
+- In one sentence, what do you do?
+- What's your #1 priority -- the thing everything else should support?
+
+
+### Section 2: Your Practice / Work
+- Where do you work or train? (institutions, sites, rotations -- however your week is split)
+- What EMR(s) do you use? (Epic, Cerner, etc. -- this shapes note templates and placeholders like `***`)
+- What does your clinical week look like? (clinic days, OR days, call structure)
+- Any academic or administrative roles? (research, teaching, committees, quality projects)
+- What tools do you use day-to-day besides the EMR? (Google Workspace, Outlook, reference managers, etc.)
+- Do you have any MCP servers already connected to Claude Code? (If you don't know what this means, just say no)
+
+
+### Section 3: Your Team
+- Who are the 2-3 key people I should know about? (e.g., program director, research mentor, co-residents, clinic coordinator -- name, role, when they matter)
+- Where does your team communicate? (email, Slack, text, etc.)
+- What's your biggest coordination pain point?
+
+
+### Section 4: Priorities, Goals & Projects
+- What are the 3-5 things you're most focused on right now?
+- Are there any deadlines or time-sensitive items I should know about? (boards, case-log deadlines, abstract submissions, applications)
+- Do you have goals or milestones you're tracking? (If yes, list them. If you don't do formal goals, your priorities above will work.)
+- What active projects are you managing right now? (specific initiatives, not ongoing responsibilities -- e.g., "retrospective chart review", "board study plan", "fellowship applications")
+
+
+### Section 5: Communication Preferences
+- How do you like information presented? (bullet points, detailed paragraphs, etc.)
+- Any writing pet peeves? (e.g., "never use emojis", "no em dashes", "keep it short")
+- What tone do you want for content that stays internal (notes to yourself, drafts)?
+- What tone do you want for external/professional content (emails to faculty, patient-facing materials)?
+
+
+### Section 6: What Do You Want Help With?
+- What are the recurring tasks that eat up your time? (documentation, case logging, study materials, schedules -- list as many as you want)
+- What would you hand off to an assistant first if you could?
+- Are there any specific workflows you want to automate or templatize?
+
+
+## Phase 3: Build out the files
+
+
+Based on my answers, fill in all the files:
+
+
+### Context files
+- **context/me.md** -- My profile based on Section 1 answers
+- **context/work.md** -- My practice/work details based on Section 2 answers
+- **context/team.md** -- Team structure based on Section 3 answers (if solo, note that and skip this file)
+- **context/current-priorities.md** -- Priorities from Section 4, dated today
+- **context/goals.md** -- Goals and milestones from Section 4. If no formal goals, use their top priorities as informal goals. Date it with the current quarter (e.g., "Q2 2026"). Include a note at the top: "Update this file at the start of each quarter."
+
+
+### Projects
+If the user listed active projects in Section 4, create a folder for each inside `projects/`. Each project folder gets a brief `README.md` with:
+- One-line description of the project
+- Current status (active, planning, on hold)
+- Key dates or deadlines mentioned
+
+
+If no specific projects were mentioned, leave `projects/` empty.
+
+
+### Rule files in .claude/rules/
+`phi-policy.md` already exists from Phase 1 -- do not weaken or rewrite it. Add rule files based on my communication preferences (Section 5):
+- **communication-style.md** -- Writing tone, formatting preferences, pet peeves
+- Any other domain-specific rules that emerged from my answers (e.g., note-formatting conventions, EMR placeholder conventions)
+
+
+Keep each rule file focused on ONE topic. Don't create more than 3-4 rule files total to start (including phi-policy.md).
+
+
+### CLAUDE.md (the main brain file)
+This is the most important file. Keep it UNDER 150 lines. It should contain:
+
+
+1. **One-line identity** -- Who you are to me (e.g., "You are Dr. [Name]'s executive assistant.")
+2. **The PHI rule, summarized in 2-3 lines at the top** -- with a pointer to `.claude/rules/phi-policy.md` as the authoritative version
+3. **Top priority** -- The #1 thing everything supports
+4. **Context imports** -- Use `@context/me.md`, `@context/team.md`, `@context/goals.md`, etc. to reference files instead of repeating their content
+5. **Tool integrations** -- What tools are connected
+6. **Skills directory** -- Point to `.claude/skills/` and explain how skills work
+7. **Decision log** -- Point to `decisions/log.md` and explain append-only convention
+8. **Memory** -- Add a section explaining how memory works:
+   - "Claude Code maintains a persistent memory across conversations. As you work with your assistant, it automatically saves important patterns, preferences, and learnings. You don't need to configure this -- it works out of the box."
+   - "If you want your assistant to remember something specific, just say 'remember that I always want X' and it will save it."
+   - "Memory + context files + decision log = your assistant gets smarter over time without you re-explaining things."
+9. **Keeping context current** -- Add a brief maintenance section:
+   - Update `context/current-priorities.md` when your focus shifts
+   - Update `context/goals.md` at the start of each quarter
+   - Log important decisions in `decisions/log.md`
+   - Add reference files as needed
+   - Build skills when you notice you're repeating the same request
+10. **Projects** -- Point to `projects/` and explain that active workstreams live there
+11. **Templates** -- Point to `templates/`
+12. **References** -- Point to `references/`
+13. **Archives rule** -- Don't delete, archive
+
+
+Do NOT put communication style rules in CLAUDE.md -- those go in `.claude/rules/communication-style.md`.
+
+
+Do NOT repeat context from the context files -- just import them with @.
+
+
+Do NOT include a "Session Start Protocol" that tells Claude to read a bunch of files -- the import system and rules handle that automatically now.
+
+
+### Skills directory
+Leave `.claude/skills/` empty. Don't create any skills yet. Just make sure CLAUDE.md mentions that skills live there and explains the pattern:
+- Each skill gets a folder: `.claude/skills/skill-name/SKILL.md`
+- Skills are built organically as recurring workflows emerge
+- Every skill automatically inherits the PHI rule from `.claude/rules/phi-policy.md` -- it never needs to be pasted into a skill
+- Include a note about the answers from Section 6 (what they want help with) as a "Skills to Build" backlog in CLAUDE.md or a separate file
+
+
+## Final Step
+
+
+After everything is created:
+1. Show me a tree view of every file and folder you created
+2. Show me a brief summary of what's in each file (one line per file)
+3. List the "Skills to Build" backlog based on my Section 6 answers -- these are the workflows we'll turn into skills over time
+4. Show me this maintenance cheat sheet:
+
+
+**Keeping Your Assistant Sharp**
+- **Weekly:** Nothing required. Auto-memory handles daily learnings for you.
+- **Monthly:** Glance at `context/current-priorities.md`. If your focus has shifted, update it.
+- **Quarterly:** Update `context/goals.md` with new goals and milestones.
+- **As needed:** Log decisions in `decisions/log.md`. Add reference files. Build new skills.
+- **Pro tip:** If you want your assistant to remember something permanently, just tell it: "Remember that I always prefer X." It will save it across all future conversations.
+
+
+5. Commit everything ("Onboarding complete: context, rules, CLAUDE.md")
+6. Remind me: if I want an off-machine backup, the GitHub repo must be PRIVATE, and the `.gitignore` from Phase 1 must already be committed (it is) before the first push
+7. Ask me if I want to build any of those skills right now
+
+
+## Important Rules for You (Claude)
+
+
+- The PHI rule overrides everything: never ask for, accept, store, or output a patient identifier during this setup or ever after.
+- Do NOT create any skills yet. The skills directory should be empty after setup.
+- Keep CLAUDE.md UNDER 150 lines. If it's getting long, you're putting too much in it.
+- Use @ imports (e.g., @context/me.md) in CLAUDE.md instead of repeating information.
+- One rule file = one topic. Max 3-4 rule files to start.
+- Ask onboarding questions ONE SECTION AT A TIME. Wait for my response before asking the next section.
+- If I say "skip" or "I'll fill that in later" for any section, create the file with a placeholder and move on.

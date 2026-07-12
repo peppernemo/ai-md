@@ -6,7 +6,13 @@ node_modules/
 # PHI — never commit patient data
 *.xlsx
 *.xls
+*.csv
 *.json
+!.claude/settings.json
 *FILLED*
 *.bak*
 ~$*
+*.jpg
+*.jpeg
+*.png
+*.heic
