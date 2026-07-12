@@ -244,14 +244,19 @@ This is the most important file. Keep it UNDER 150 lines. It should contain:
    - "Memory + context files + decision log = your assistant gets smarter over time without you re-explaining things."
 9. **Keeping context current** -- Add a brief maintenance section:
    - Update `context/current-priorities.md` when your focus shifts
-   - Update `context/goals.md` at the start of each quarter
+   - Update `context/goals.md` at the start of each quarter -- and include this session-start check in CLAUDE.md: "If the quarter header in `context/goals.md` doesn't match the current quarter, flag it before other work." (Stale context fails silently otherwise.)
    - Log important decisions in `decisions/log.md`
    - Add reference files as needed
-   - Build skills when you notice you're repeating the same request
-10. **Projects** -- Point to `projects/` and explain that active workstreams live there
-11. **Templates** -- Point to `templates/`
-12. **References** -- Point to `references/`
-13. **Archives rule** -- Don't delete, archive
+   - Build skills when you notice you're repeating the same request; prune "Skills to Build" backlog items once they're built
+10. **The altitude rule** -- Add a short section on where things live, so the setup stays clean as it grows:
+   - CLAUDE.md holds pointers, not protocols
+   - Universal invariants (the PHI rule, communication style) live in `.claude/rules/`
+   - Conventions that matter to only one job live inside that job's `SKILL.md` -- not in memory, not in CLAUDE.md
+   - Memory holds recent corrections that haven't settled yet; when one proves stable, graduate it into the relevant skill or rule
+11. **Projects** -- Point to `projects/` and explain that active workstreams live there
+12. **Templates** -- Point to `templates/`
+13. **References** -- Point to `references/`
+14. **Archives rule** -- Don't delete, archive
 
 
 Do NOT put communication style rules in CLAUDE.md -- those go in `.claude/rules/communication-style.md`.
@@ -284,8 +289,9 @@ After everything is created:
 **Keeping Your Assistant Sharp**
 - **Weekly:** Nothing required. Auto-memory handles daily learnings for you.
 - **Monthly:** Glance at `context/current-priorities.md`. If your focus has shifted, update it.
-- **Quarterly:** Update `context/goals.md` with new goals and milestones.
-- **As needed:** Log decisions in `decisions/log.md`. Add reference files. Build new skills.
+- **Quarterly:** Update `context/goals.md` with new goals and milestones. (Your CLAUDE.md tells the assistant to flag a stale quarter header, so this won't slip silently.)
+- **As skills mature:** When a remembered correction has proven stable, move it into the relevant skill or rule file and let the memory go -- skills are the durable home for settled conventions.
+- **As needed:** Log decisions in `decisions/log.md`. Add reference files. Build new skills; prune built ones from the backlog.
 - **Pro tip:** If you want your assistant to remember something permanently, just tell it: "Remember that I always prefer X." It will save it across all future conversations.
 
 

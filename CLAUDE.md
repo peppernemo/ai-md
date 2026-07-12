@@ -42,11 +42,20 @@ you re-explaining things.
 Each active workstream gets `projects/<name>/README.md` (status, current step, files).
 
 ## Maintenance
+- Session-start check: if the quarter header in `context/goals.md` doesn't match
+  the current quarter, flag it before other work
 - Update `current-priorities.md` when focus shifts
 - Update `goals.md` at the start of each quarter
 - Archive completed work to `archives/` (don't delete)
 
+## Where things live (altitude rule)
+- CLAUDE.md holds pointers, not protocols
+- Universal invariants (PHI, tone) live in `.claude/rules/`
+- A convention that matters to one job lives in that job's SKILL.md
+- Memory holds recent corrections; graduate stable ones into the skill or rule
+
 ## Skills to Build (backlog)
+Prune items once built -- shipped skills live in `.claude/skills/`.
 1. clinic-note — draft notes from de-identified inputs
 2. consult-note — structured consults from de-identified inputs
 3. call-schedule — add your on-call shifts to Google Calendar

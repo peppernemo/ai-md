@@ -506,14 +506,19 @@ This is the most important file. Keep it UNDER 150 lines. It should contain:
    - &quot;Memory + context files + decision log = your assistant gets smarter over time without you re-explaining things.&quot;
 9. **Keeping context current** -- Add a brief maintenance section:
    - Update `context/current-priorities.md` when your focus shifts
-   - Update `context/goals.md` at the start of each quarter
+   - Update `context/goals.md` at the start of each quarter -- and include this session-start check in CLAUDE.md: &quot;If the quarter header in `context/goals.md` doesn&#x27;t match the current quarter, flag it before other work.&quot; (Stale context fails silently otherwise.)
    - Log important decisions in `decisions/log.md`
    - Add reference files as needed
-   - Build skills when you notice you&#x27;re repeating the same request
-10. **Projects** -- Point to `projects/` and explain that active workstreams live there
-11. **Templates** -- Point to `templates/`
-12. **References** -- Point to `references/`
-13. **Archives rule** -- Don&#x27;t delete, archive
+   - Build skills when you notice you&#x27;re repeating the same request; prune &quot;Skills to Build&quot; backlog items once they&#x27;re built
+10. **The altitude rule** -- Add a short section on where things live, so the setup stays clean as it grows:
+   - CLAUDE.md holds pointers, not protocols
+   - Universal invariants (the PHI rule, communication style) live in `.claude/rules/`
+   - Conventions that matter to only one job live inside that job&#x27;s `SKILL.md` -- not in memory, not in CLAUDE.md
+   - Memory holds recent corrections that haven&#x27;t settled yet; when one proves stable, graduate it into the relevant skill or rule
+11. **Projects** -- Point to `projects/` and explain that active workstreams live there
+12. **Templates** -- Point to `templates/`
+13. **References** -- Point to `references/`
+14. **Archives rule** -- Don&#x27;t delete, archive
 
 
 Do NOT put communication style rules in CLAUDE.md -- those go in `.claude/rules/communication-style.md`.
@@ -546,8 +551,9 @@ After everything is created:
 **Keeping Your Assistant Sharp**
 - **Weekly:** Nothing required. Auto-memory handles daily learnings for you.
 - **Monthly:** Glance at `context/current-priorities.md`. If your focus has shifted, update it.
-- **Quarterly:** Update `context/goals.md` with new goals and milestones.
-- **As needed:** Log decisions in `decisions/log.md`. Add reference files. Build new skills.
+- **Quarterly:** Update `context/goals.md` with new goals and milestones. (Your CLAUDE.md tells the assistant to flag a stale quarter header, so this won&#x27;t slip silently.)
+- **As skills mature:** When a remembered correction has proven stable, move it into the relevant skill or rule file and let the memory go -- skills are the durable home for settled conventions.
+- **As needed:** Log decisions in `decisions/log.md`. Add reference files. Build new skills; prune built ones from the backlog.
 - **Pro tip:** If you want your assistant to remember something permanently, just tell it: &quot;Remember that I always prefer X.&quot; It will save it across all future conversations.
 
 
@@ -630,11 +636,20 @@ you re-explaining things.
 Each active workstream gets `projects/&lt;name&gt;/README.md` (status, current step, files).
 
 ## Maintenance
+- Session-start check: if the quarter header in `context/goals.md` doesn&#x27;t match
+  the current quarter, flag it before other work
 - Update `current-priorities.md` when focus shifts
 - Update `goals.md` at the start of each quarter
 - Archive completed work to `archives/` (don&#x27;t delete)
 
+## Where things live (altitude rule)
+- CLAUDE.md holds pointers, not protocols
+- Universal invariants (PHI, tone) live in `.claude/rules/`
+- A convention that matters to one job lives in that job&#x27;s SKILL.md
+- Memory holds recent corrections; graduate stable ones into the skill or rule
+
 ## Skills to Build (backlog)
+Prune items once built -- shipped skills live in `.claude/skills/`.
 1. clinic-note — draft notes from de-identified inputs
 2. consult-note — structured consults from de-identified inputs
 3. call-schedule — add your on-call shifts to Google Calendar
@@ -1035,6 +1050,11 @@ Write it to .claude/skills/journal-club/SKILL.md with a name, a description that
       <tr><td><strong>It got something wrong</strong></td>
           <td>Correct it, then say <em>"remember that&hellip;"</em> so the correction persists, or have
               it write the convention into a rule file. Every correction should only happen once.</td></tr>
+      <tr><td><strong>Rule, skill, or memory?</strong></td>
+          <td>Think altitude. <code>CLAUDE.md</code> = pointers, not protocols. <code>.claude/rules/</code>
+              = universal invariants (PHI, tone). A convention that matters to only one job belongs in
+              that job's <code>SKILL.md</code>. Memory = recent corrections that haven't settled &mdash;
+              once one proves stable, graduate it into the skill or rule and let the memory go.</td></tr>
       <tr><td><strong>Is this allowed at my institution?</strong></td>
           <td>Know your institution's AI policy. This setup handles <em>de-identified</em> text only
               &mdash; that's what makes it defensible &mdash; and anything with identifiers belongs in your
