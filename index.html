@@ -916,6 +916,20 @@ Write it to .claude/skills/clinic-note/SKILL.md with a name, a description that 
     </details>
 
     <details class="card promptcard">
+      <summary><span class="pname"><code>clinic-day</code> &mdash; Run a whole clinic across parallel terminals: one de-identified file per patient, jot → finalized note → clipboard.</span><span class="sum-hint">build prompt &#9662;</span></summary>
+      <div class="actions" style="justify-content:flex-end;padding:.5rem .9rem 0;"><button class="btn" onclick="copyCode(this)">Copy build prompt</button></div>
+      <pre class="code"><code>Create a Claude Code skill named &quot;clinic-day&quot;.
+
+Goal: Orchestrate a whole clinic day ON TOP of my clinic-note skill, with state on disk so I can run 2-3 terminals at once. Store one de-identified bundle file per patient under clinic/&lt;date&gt;/, named by the patient&#x27;s identity KEY = last 3 digits of the MRN plus age/sex (never a name). Night-before prep: I paste each chart under a &#x27;--- &lt;key&gt;&#x27; header; scrub identifiers, write bundles/&lt;key&gt;.md, and pre-chart a note skeleton. During clinic, from ANY terminal: &#x27;&lt;key&gt;: &lt;shorthand&gt;&#x27; merges my jottings into that patient&#x27;s note and writes the finished note to a file; &#x27;copy &lt;key&gt;&#x27; loads it onto the clipboard for Epic; &#x27;review &lt;key&gt;&#x27; prints a 10-second pre-room summary. Regenerate a printable face sheet (key, age/sex, diagnosis, done-box, running total) on every add-on. Wipe the day folder at end of day -- no cross-visit patient library.
+
+Trigger phrases: &quot;clinic prep for tomorrow&quot;, &quot;&lt;key&gt;: &lt;jottings&gt;&quot;, &quot;copy &lt;key&gt;&quot;, &quot;wrap clinic&quot; (and /clinic-day).
+
+PHI rule (critical): never let a patient name, MRN, DOB, or face reach the model. Work only from de-identified input, and emit *** placeholders for any identifier I&#x27;ll type into Epic myself. A global PHI rule also lives in .claude/rules/ -- rely on it and restate it briefly in the skill. Name files by the last-3-MRN key (not a sequential number) so parallel terminals can never overwrite each other. The last-3 MRN is an identity check, not PHI.
+
+Write it to .claude/skills/clinic-day/SKILL.md with a name, a description that lists the trigger phrases, and numbered step-by-step instructions for the workflow. Before writing, ask me for anything you need -- my templates, file locations, or account access. Then create the SKILL.md.</code></pre>
+    </details>
+
+    <details class="card promptcard">
       <summary><span class="pname"><code>op-report</code> &mdash; Operative notes from free-form dictation, with ICD-10/CPT codes assigned.</span><span class="sum-hint">build prompt &#9662;</span></summary>
       <div class="actions" style="justify-content:flex-end;padding:.5rem .9rem 0;"><button class="btn" onclick="copyCode(this)">Copy build prompt</button></div>
       <pre class="code"><code>Create a Claude Code skill named &quot;op-report&quot;.
